@@ -2,6 +2,36 @@ import tkinter as tk
 from tkinter import messagebox
 import re
 
+
+def EnteroValido(valor):
+    try:
+        int(valor)
+        return True
+    except ValueError:
+        messagebox.showerror("Error Edad", "Valor de edad equivocado")
+        return False
+
+def DecimalValido(valor):
+    try:
+        float(valor)
+        return True
+    except ValueError:
+        return False
+
+def TelefonoValido(valor):
+    return valor.isdigit() and len(valor) == 10
+
+def TextoValido(valor):
+    return bool(re.match("^[a-zA-Z\\s]+$", valor))
+
+def borrar():
+    tbNombre.delete(0, tk.END)
+    tbApellidos.delete(0, tk.END)
+    tbEdad.delete(0, tk.END)
+    tbTelefono.delete(0, tk.END)
+    tbEstatura.delete(0, tk.END)
+    rbSeleccionGenero.set(0)
+
 ventana = tk.Tk()
 ventana.configure(bg="pink")
 ventana.geometry("350x550")
