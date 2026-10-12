@@ -1,0 +1,7 @@
+Nombre: Alarik
+Apellidos: Jimenez Glez
+Edad: 19
+Telefono: 9631590373
+Estatura: 1.65
+Genero: Masculino
+

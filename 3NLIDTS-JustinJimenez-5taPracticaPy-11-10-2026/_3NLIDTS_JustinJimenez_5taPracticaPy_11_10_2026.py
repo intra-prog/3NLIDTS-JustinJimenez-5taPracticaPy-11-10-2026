@@ -32,6 +32,36 @@ def borrar():
     tbEstatura.delete(0, tk.END)
     rbSeleccionGenero.set(0)
 
+def guardar():
+    nombres = tbNombre.get()
+    apellidos = tbApellidos.get()
+    edad = tbEdad.get()
+    tel = tbTelefono.get()
+    estatura = tbEstatura.get()
+    genero = ""
+
+    if rbSeleccionGenero.get() == 1:
+        genero = "Masculino"
+    elif rbSeleccionGenero.get() == 2:
+        genero = "Femenino"
+    elif rbSeleccionGenero.get() == 3:
+        genero = "No Definido"
+
+    if (EnteroValido(edad) and DecimalValido(estatura) and
+        TelefonoValido(tel) and TextoValido(nombres) and
+        TextoValido(apellidos)):
+        datos = ("Nombre: " + nombres + "\n" +
+                 "Apellidos: " + apellidos + "\n" +
+                 "Edad: " + edad + "\n" +
+                 "Telefono: " + tel + "\n" +
+                 "Estatura: " + estatura + "\n" +
+                 "Genero: " + genero)
+        with open("Datos3D_13Feb26.txt", "a") as archivo:
+            archivo.write(datos + "\n\n")
+        messagebox.showinfo("Informacion", "Datos guardados correctamente \n" + datos)
+    else:
+        messagebox.showerror("Error", "Algunos de los campos tienen Formato equivocado")
+
 ventana = tk.Tk()
 ventana.configure(bg="pink")
 ventana.geometry("350x550")
@@ -70,9 +100,9 @@ rbNoDefinido.grid(column=3, row=1)
 
 gb2 = tk.LabelFrame(ventana, text="")
 gb2.pack(padx=10, pady=8)
-btnGuardar = tk.Button(gb2, text="Guardar", width=10, padx=10, pady=8)
+btnGuardar = tk.Button(gb2, text="Guardar", width=10, padx=10, pady=8, command=guardar)
 btnGuardar.grid(column=1, row=1)
-btnBorrar = tk.Button(gb2, text="Borrar", width=10, padx=10, pady=8)
+btnBorrar = tk.Button(gb2, text="Borrar", width=10, padx=10, pady=8, command=borrar)
 btnBorrar.grid(column=2, row=1)
 
 ventana.mainloop()
