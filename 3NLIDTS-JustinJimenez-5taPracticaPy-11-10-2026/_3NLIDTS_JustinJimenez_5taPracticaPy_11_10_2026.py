@@ -1,28 +1,61 @@
 import tkinter as tk
 from tkinter import messagebox
 import re
+import mysql.connector
 
 
-def EnteroValido(valor):
+def insertarRegistro(nombre, apellidos, edad, telefono, estatura, genero):
+    try:
+        conexion = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="admin",
+            database="programacion"
+        )
+
+        cursor = conexion.cursor()
+        query = """
+            INSERT INTO registros
+                (nombre, apellidos, edad, telefono, estatura, genero)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """
+        valores = (nombre, apellidos, edad, telefono, estatura, genero)
+
+        cursor.execute(query, valores)
+        conexion.commit()
+
+        cursor.close()
+        conexion.close()
+
+        messagebox.showinfo("Información", "Datos guardados en MySQL.")
+
+    except mysql.connector.Error as err:
+        messagebox.showerror("Error", f"No se pudieron guardar los datos:\n{err}")
+
+
+def enteroValido(valor):
     try:
         int(valor)
         return True
     except ValueError:
-        messagebox.showerror("Error Edad", "Valor de edad equivocado")
         return False
 
-def DecimalValido(valor):
+
+def decimalValido(valor):
     try:
         float(valor)
         return True
     except ValueError:
         return False
 
-def TelefonoValido(valor):
+
+def telefonoValido(valor):
     return valor.isdigit() and len(valor) == 10
 
-def TextoValido(valor):
-    return bool(re.match("^[a-zA-Z\\s]+$", valor))
+
+def textoValido(valor):
+    return bool(re.fullmatch(r"[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+", valor))
+
 
 def borrar():
     tbNombre.delete(0, tk.END)
@@ -32,78 +65,111 @@ def borrar():
     tbEstatura.delete(0, tk.END)
     rbSeleccionGenero.set(0)
 
-def guardar():
-    nombres = tbNombre.get()
-    apellidos = tbApellidos.get()
-    edad = tbEdad.get()
-    tel = tbTelefono.get()
-    estatura = tbEstatura.get()
-    genero = ""
 
+def guardar():
+    nombre = tbNombre.get().strip()
+    apellidos = tbApellidos.get().strip()
+    edad = tbEdad.get().strip()
+    telefono = tbTelefono.get().strip()
+    estatura = tbEstatura.get().strip()
+
+    genero = ""
     if rbSeleccionGenero.get() == 1:
         genero = "Masculino"
     elif rbSeleccionGenero.get() == 2:
         genero = "Femenino"
     elif rbSeleccionGenero.get() == 3:
-        genero = "No Definido"
+        genero = "No definido"
 
-    if (EnteroValido(edad) and DecimalValido(estatura) and
-        TelefonoValido(tel) and TextoValido(nombres) and
-        TextoValido(apellidos)):
-        datos = ("Nombre: " + nombres + "\n" +
-                 "Apellidos: " + apellidos + "\n" +
-                 "Edad: " + edad + "\n" +
-                 "Telefono: " + tel + "\n" +
-                 "Estatura: " + estatura + "\n" +
-                 "Genero: " + genero)
-        with open("Datos3D_13Feb26.txt", "a") as archivo:
-            archivo.write(datos + "\n\n")
-        messagebox.showinfo("Informacion", "Datos guardados correctamente \n" + datos)
-    else:
-        messagebox.showerror("Error", "Algunos de los campos tienen Formato equivocado")
+    if not (
+        enteroValido(edad)
+        and decimalValido(estatura)
+        and telefonoValido(telefono)
+        and textoValido(nombre)
+        and textoValido(apellidos)
+        and genero
+    ):
+        messagebox.showerror(
+            "Error",
+            "Revisa los campos: nombre y apellidos deben ser texto, "
+            "edad un número, estatura decimal, teléfono de 10 dígitos "
+            "y debes seleccionar un género."
+        )
+        return
+
+    insertarRegistro(
+        nombre,
+        apellidos,
+        int(edad),
+        float(estatura),
+        telefono,
+        genero
+    )
+
 
 ventana = tk.Tk()
-ventana.configure(bg="pink")
+ventana.configure(bg="yellow")
 ventana.geometry("350x550")
-ventana.title("Actividad 04 - Formulario de Registro Vr. 001")
+ventana.title("Actividad 04 - Formulario de Registro")
 
 rbSeleccionGenero = tk.IntVar()
 
-tk.Label(ventana, text="Nombre:", font=("Segoe UI", 14, "bold")).pack(padx=10, pady=8)
+tk.Label(
+    ventana, text="Nombre:", font=("Segoe UI", 14, "bold")
+).pack(padx=10, pady=8)
 tbNombre = tk.Entry(ventana, width=35, justify="center")
 tbNombre.pack()
 
-tk.Label(ventana, text="Apellidos:", font=("Segoe UI", 14, "bold")).pack(padx=10, pady=8)
+tk.Label(
+    ventana, text="Apellidos:", font=("Segoe UI", 14, "bold")
+).pack(padx=10, pady=8)
 tbApellidos = tk.Entry(ventana, width=35, justify="center")
 tbApellidos.pack()
 
-tk.Label(ventana, text="Edad:", font=("Segoe UI", 14, "bold")).pack(padx=10, pady=8)
+tk.Label(
+    ventana, text="Edad:", font=("Segoe UI", 14, "bold")
+).pack(padx=10, pady=8)
 tbEdad = tk.Entry(ventana, width=10, justify="center")
 tbEdad.pack()
 
-tk.Label(ventana, text="Estatura:", font=("Segoe UI", 14, "bold")).pack(padx=10, pady=8)
+tk.Label(
+    ventana, text="Estatura:", font=("Segoe UI", 14, "bold")
+).pack(padx=10, pady=8)
 tbEstatura = tk.Entry(ventana, width=15, justify="center")
 tbEstatura.pack()
 
-tk.Label(ventana, text="Telefono:", font=("Segoe UI", 14, "bold")).pack(padx=10, pady=8)
+tk.Label(
+    ventana, text="Teléfono:", font=("Segoe UI", 14, "bold")
+).pack(padx=10, pady=8)
 tbTelefono = tk.Entry(ventana, width=35, justify="center")
 tbTelefono.pack()
 
-gb = tk.LabelFrame(ventana, text="Selecione un Genero", padx=10, pady=8)
-gb.pack(padx=10, pady=8)
-rbMasculino = tk.Radiobutton(gb, text="Masculino", value=1, variable=rbSeleccionGenero)
-rbMasculino.grid(column=1, row=1)
-rbFemenino = tk.Radiobutton(gb, text="Femenino", value=2, variable=rbSeleccionGenero)
-rbFemenino.grid(column=2, row=1)
-rbNoDefinido = tk.Radiobutton(gb, text="No Definido", value=3, variable=rbSeleccionGenero)
-rbNoDefinido.grid(column=3, row=1)
+grupoGenero = tk.LabelFrame(
+    ventana, text="Selecciona un género:", padx=10, pady=8
+)
+grupoGenero.pack(padx=10, pady=8)
 
-gb2 = tk.LabelFrame(ventana, text="")
-gb2.pack(padx=10, pady=8)
-btnGuardar = tk.Button(gb2, text="Guardar", width=10, padx=10, pady=8, command=guardar)
-btnGuardar.grid(column=1, row=1)
-btnBorrar = tk.Button(gb2, text="Borrar", width=10, padx=10, pady=8, command=borrar)
-btnBorrar.grid(column=2, row=1)
+tk.Radiobutton(
+    grupoGenero, text="Masculino", value=1, variable=rbSeleccionGenero
+).grid(column=1, row=1)
+
+tk.Radiobutton(
+    grupoGenero, text="Femenino", value=2, variable=rbSeleccionGenero
+).grid(column=2, row=1)
+
+tk.Radiobutton(
+    grupoGenero, text="No definido", value=3, variable=rbSeleccionGenero
+).grid(column=3, row=1)
+
+grupoBotones = tk.LabelFrame(ventana, text="")
+grupoBotones.pack(padx=10, pady=8)
+
+tk.Button(
+    grupoBotones, text="Guardar", width=10, padx=10, pady=8, command=guardar
+).grid(column=1, row=1)
+
+tk.Button(
+    grupoBotones, text="Borrar", width=10, padx=10, pady=8, command=borrar
+).grid(column=2, row=1)
 
 ventana.mainloop()
-
